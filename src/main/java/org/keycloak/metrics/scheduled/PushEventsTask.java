@@ -2,19 +2,19 @@ package org.keycloak.metrics.scheduled;
 
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.persistence.Tuple;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
-import org.keycloak.events.jpa.EventEntity;
 import org.keycloak.metrics.utils.AmsCommunication;
 import org.keycloak.metrics.utils.MetricsUtils;
-import org.keycloak.metrics.jpa.EventNotSendEntity;
 import org.keycloak.metrics.jpa.EventNotSendRepository;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.timer.ScheduledTask;
@@ -32,11 +32,11 @@ public class PushEventsTask implements ScheduledTask {
         session.realms().getRealmsStream().forEach(realm -> {
             String metricsUrl = realm.getAttribute(MetricsUtils.AMS_URL);
             if (metricsUrl != null) {
-                Stream<EventNotSendEntity> events = repository.eventsNotSendByRealm(realm.getId());
+                Stream<Tuple> events = repository.eventsNotSendByRealm(realm.getId());
                 events.forEach(eventNotSend -> {
                     try {
-                        AmsCommunication.communicate(realm, convertEventEntity(eventNotSend.getId().getEvent()));
-                        repository.deleteEntity(eventNotSend);
+                        AmsCommunication.communicate(realm, convertEventEntity(eventNotSend));
+                        repository.deleteEntity((String) eventNotSend.get("id"));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -46,19 +46,18 @@ public class PushEventsTask implements ScheduledTask {
         });
     }
 
-    private Event convertEventEntity(EventEntity eventEntity) {
+    private Event convertEventEntity(Tuple tuple) {
         Event event = new Event();
-        event.setId(eventEntity.getId() == null ? UUID.randomUUID().toString() : eventEntity.getId());
-        event.setTime(eventEntity.getTime());
-        event.setType(EventType.valueOf(eventEntity.getType()));
-        event.setRealmId(eventEntity.getRealmId());
-        event.setClientId(eventEntity.getClientId());
-        event.setUserId(eventEntity.getUserId());
-        event.setSessionId(eventEntity.getSessionId());
-        event.setIpAddress(eventEntity.getIpAddress());
-        event.setError(eventEntity.getError());
+        event.setId((String) tuple.get("id"));
+        event.setTime(((BigInteger) tuple.get("event_time")).longValue());
+        event.setType(EventType.valueOf((String) tuple.get("type")));
+        event.setClientId((String) tuple.get("client_id"));
+        event.setUserId((String) tuple.get("user_id"));
+        event.setSessionId((String) tuple.get("session_id"));
+        event.setIpAddress((String) tuple.get("ip_address"));
+        event.setError((String) tuple.get("error"));
         try {
-            Map<String, String> details = mapper.readValue(eventEntity.getDetailsJson(), mapType);
+            Map<String, String> details = mapper.readValue((String) tuple.get("details_json"), mapType);
             event.setDetails(details);
         } catch (IOException ex) {
             logger.error("Failed to read log details", ex);

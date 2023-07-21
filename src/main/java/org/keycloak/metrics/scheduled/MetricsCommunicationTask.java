@@ -2,8 +2,6 @@ package org.keycloak.metrics.scheduled;
 
 import org.keycloak.events.Event;
 import org.keycloak.metrics.utils.AmsCommunication;
-import org.keycloak.metrics.jpa.EventNotSendEntity;
-import org.keycloak.metrics.jpa.EventNotSendId;
 import org.keycloak.metrics.jpa.EventNotSendRepository;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -28,10 +26,7 @@ public class MetricsCommunicationTask implements ScheduledTask {
         } catch (Exception e) {
             e.printStackTrace();
             EventNotSendRepository eventNotSendRepository = new EventNotSendRepository(session);
-            EventNotSendEntity entity = new EventNotSendEntity();
-            EventNotSendId id = new EventNotSendId(realmId, event.getId());
-            entity.setId(id);
-            eventNotSendRepository.create(entity);
+            eventNotSendRepository.create(event.getId(), realmId);
         }
 
     }

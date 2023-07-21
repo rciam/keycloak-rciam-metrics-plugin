@@ -6,11 +6,9 @@ C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\jpa
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\jpa\MetricsEntityProvider.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\events\MetricsCommunicationProvider.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\representations\MetricsDto.java
-C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\jpa\EventNotSendId.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\scheduled\MetricsTimerTaskContextImpl.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\scheduled\MetricsTimerProvider.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\utils\MetricsUtils.java
-C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\jpa\EventNotSendEntity.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\scheduled\MetricsCommunicationTask.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\utils\AmsCommunication.java
 C:\old_E\projects\keycloak-metrics-plugin\src\main\java\org\keycloak\metrics\representations\AmsDto.java

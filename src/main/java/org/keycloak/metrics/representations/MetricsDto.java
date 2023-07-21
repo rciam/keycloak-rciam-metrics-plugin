@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -13,6 +14,7 @@ import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RealmModel;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MetricsDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -28,8 +30,7 @@ public class MetricsDto {
     private String eventIdentifier;
     private String type;
 
-    @JsonProperty("failed_login")
-    private Boolean failedLogin;
+    private Boolean failed_login;
 
     private String status;
 
@@ -45,12 +46,12 @@ public class MetricsDto {
         switch (event.getType()) {
             case LOGIN:
                 this.type = "login";
-                this.failedLogin = false;
+                this.failed_login = false;
                 setLogin(event, realm);
                 break;
             case LOGIN_ERROR:
                 this.type = "login";
-                this.failedLogin = true;
+                this.failed_login = true;
                 setLogin(event, realm);
                 break;
             case REGISTER:
@@ -136,12 +137,12 @@ public class MetricsDto {
         this.source = source;
     }
 
-    public boolean getFailedLogin() {
-        return failedLogin;
+    public boolean getFailed_login() {
+        return failed_login;
     }
 
-    public void setFailedLogin(boolean failedLogin) {
-        this.failedLogin = failedLogin;
+    public void setFailed_login(boolean failed_login) {
+        this.failed_login = failed_login;
     }
 
     public String getEventIdentifier() {

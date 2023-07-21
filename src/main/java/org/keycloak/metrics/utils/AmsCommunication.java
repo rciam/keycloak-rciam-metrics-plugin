@@ -27,6 +27,7 @@ public class AmsCommunication {
         String encodedData = Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(metricsDto));
         AmsDto amsDto = new AmsDto(new MessagesDto(encodedData));
         String amsJson = objectMapper.writeValueAsString(amsDto);
+        logger.info("try to write message with body : "+ amsJson);
 
         Request request = new Request.Builder()
                 .url(realm.getAttribute(MetricsUtils.AMS_URL) + MetricsUtils.PUBLISH)
@@ -35,8 +36,6 @@ public class AmsCommunication {
                 .addHeader(MetricsUtils.API_KEY, realm.getAttribute(MetricsUtils.API_KEY))
                 .post(RequestBody.create(amsJson, JSON))
                 .build();
-
-
 
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {

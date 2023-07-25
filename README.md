@@ -14,3 +14,8 @@ A pluggable metrics events plugin for keycloak. To be used together with metrics
 You need to define the following realm attributes in order Keycloak metric plugin to be able to communicate with Metrics:
 - amsUrl : ams url
 - X-Api-Key : ams token
+- tenenvId : environment parameter
+- source : Keycloak
+- keycloakUrl : Keycloak main url
+
+Morevoer, you need to add in Events Config -> Event Listeners the "metrics-communication".

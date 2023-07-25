@@ -14,6 +14,7 @@
 
     <properties>
         <quarkus.version>2.7.5.Final</quarkus.version>
+        <okhttp.version>4.10.0</okhttp.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

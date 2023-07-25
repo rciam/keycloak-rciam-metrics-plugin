@@ -18,4 +18,4 @@ You need to define the following realm attributes in order Keycloak metric plugi
 - source : Keycloak
 - keycloakUrl : Keycloak main url
 
-Morevoer, you need to add in Events Config -> Event Listeners the "metrics-communication".
+Moreover, you need to add in Events Config -> Event Listeners the "metrics-communication".

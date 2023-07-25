@@ -24,7 +24,7 @@ public class EventNotSendRepository {
         em.createNativeQuery("delete from event_not_send where event_id = :eventId").setParameter("eventId", eventId).executeUpdate();
     }
 
-    public Stream<Tuple> eventsNotSendByRealm(String realmId){
-        return em.createNativeQuery("select f.*  from event_entity f join event_not_send e on f.id = e.event_id where e.realm_id= :realmId", Tuple.class).setParameter("realmId",realmId).getResultStream();
+    public Stream<Tuple> eventsNotSendByRealm(String realmId) {
+        return em.createNativeQuery("select f.*  from event_entity f join event_not_send e on f.id = e.event_id where e.realm_id= :realmId", Tuple.class).setParameter("realmId", realmId).getResultStream();
     }
 }

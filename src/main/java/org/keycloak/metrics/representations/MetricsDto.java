@@ -39,7 +39,7 @@ public class MetricsDto {
 
     }
 
-    public MetricsDto(Event event, RealmModel realm){
+    public MetricsDto(Event event, RealmModel realm) {
         this.date = LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault());
         this.tenenvId = realm.getAttribute(MetricsUtils.TENENV_ID);
         this.source = realm.getAttribute(MetricsUtils.SOURCE);
@@ -62,26 +62,26 @@ public class MetricsDto {
         }
     }
 
-    private void setLogin(Event event, RealmModel realm){
+    private void setLogin(Event event, RealmModel realm) {
         this.ipAddress = event.getIpAddress();
         this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
-        if ( event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
+        if (event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
             //proxy like EGI
             this.entityId = event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY);
-        } else if ( event.getDetails().get(MetricsUtils.IDP_ALIAS) != null) {
+        } else if (event.getDetails().get(MetricsUtils.IDP_ALIAS) != null) {
             //idp
             String idpAlias = event.getDetails().get(MetricsUtils.IDP_ALIAS);
             IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpAlias);
             if (idp != null) {
-                this.entityId = idp.getConfig().get(MetricsUtils.ENTITY_ID) != null ? idp.getConfig().get(MetricsUtils.ENTITY_ID) : (idp.getConfig().get(MetricsUtils.ISSUER) != null  ? idp.getConfig().get(MetricsUtils.ISSUER) : idpAlias);
-                this.idpName = idp.getDisplayName() !=null ? idp.getDisplayName() : idpAlias;
+                this.entityId = idp.getConfig().get(MetricsUtils.ENTITY_ID) != null ? idp.getConfig().get(MetricsUtils.ENTITY_ID) : (idp.getConfig().get(MetricsUtils.ISSUER) != null ? idp.getConfig().get(MetricsUtils.ISSUER) : idpAlias);
+                this.idpName = idp.getDisplayName() != null ? idp.getDisplayName() : idpAlias;
             }
         } else {
             //Keycloak user
             this.entityId = realm.getAttribute(MetricsUtils.KEYCLOAK_URL) + "/realms/" + realm.getName();
             this.idpName = "Keycloak";
         }
-            this.identifier =  event.getClientId();
+        this.identifier = event.getClientId();
         ClientModel client = realm.getClientByClientId(event.getClientId());
         if (client != null) {
             this.spName = client.getName();

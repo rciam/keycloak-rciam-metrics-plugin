@@ -8,11 +8,11 @@ public class AmsDto {
 
     private List<MessagesDto> messages;
 
-    public AmsDto(){
+    public AmsDto() {
 
     }
 
-    public AmsDto(MessagesDto message){
+    public AmsDto(MessagesDto message) {
         messages = Stream.of(message).collect(Collectors.toList());
     }
 

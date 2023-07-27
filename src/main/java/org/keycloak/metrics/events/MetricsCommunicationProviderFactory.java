@@ -21,7 +21,7 @@ public class MetricsCommunicationProviderFactory implements EventListenerProvide
 
     private static final Set<EventType> SUPPORTED_EVENTS = new HashSet<>();
     static {
-        Collections.addAll(SUPPORTED_EVENTS, EventType.LOGIN, EventType.LOGIN_ERROR);
+        Collections.addAll(SUPPORTED_EVENTS, EventType.LOGIN, EventType.LOGIN_ERROR, EventType.REGISTER);
     }
 
     private Set<EventType> includedEvents = new HashSet<>();
@@ -75,14 +75,14 @@ public class MetricsCommunicationProviderFactory implements EventListenerProvide
                 .property()
                 .name("include-events")
                 .type("string")
-                .helpText("A comma-separated list of events that should be sent via email to the user's account.")
+                .helpText("A comma-separated list of events that are supported.")
                 .options(supportedEvents)
                 .defaultValue("All events")
                 .add()
                 .property()
                 .name("exclude-events")
                 .type("string")
-                .helpText("A comma-separated list of events that should not be sent via email to the user's account.")
+                .helpText("A comma-separated list of events that are excluded.")
                 .options(supportedEvents)
                 .add()
                 .build();

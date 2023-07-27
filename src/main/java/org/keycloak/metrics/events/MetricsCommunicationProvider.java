@@ -1,9 +1,6 @@
 package org.keycloak.metrics.events;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
@@ -21,8 +18,6 @@ public class MetricsCommunicationProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private Set<EventType> includedEvents;
-    private static final List<EventType> acceptedEventsType = Stream.of(EventType.LOGIN, EventType.LOGIN_ERROR, EventType.IDENTITY_PROVIDER_FIRST_LOGIN).collect(Collectors.toList());
-
     private EventListenerTransaction tx = new EventListenerTransaction(null, this::metricsCommunication);
 
     public MetricsCommunicationProvider(KeycloakSession session, Set<EventType> includedEvents) {
@@ -33,16 +28,16 @@ public class MetricsCommunicationProvider implements EventListenerProvider {
 
     @Override
     public void onEvent(Event event) {
-        if (includedEvents.contains(event.getType()))
+        RealmModel realm = session.realms().getRealm(event.getRealmId());
+        if (realm.getAttribute(MetricsUtils.AMS_URL) != null && includedEvents.contains(event.getType()))
             tx.addEvent(event);
     }
 
     private void metricsCommunication(Event event) {
         RealmModel realm = session.realms().getRealm(event.getRealmId());
-        if (realm.getAttribute(MetricsUtils.AMS_URL) != null && acceptedEventsType.contains(event.getType())) {
-            MetricsTimerProvider timer = (MetricsTimerProvider) session.getProvider(TimerProvider.class, "metrics");
-            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(event, realm.getId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + event.getId());
-        }
+        MetricsTimerProvider timer = (MetricsTimerProvider) session.getProvider(TimerProvider.class, "metrics");
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(event, realm.getId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + event.getId());
+
     }
 
     @Override

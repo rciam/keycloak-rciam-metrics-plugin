@@ -3,6 +3,7 @@ package org.keycloak.metrics.representations;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -64,6 +65,8 @@ public class MetricsDto {
 
     private void setLogin(Event event, RealmModel realm) {
         this.ipAddress = event.getIpAddress();
+        if (event.getDetails() == null)
+            event.setDetails(new HashMap<>());
         this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
         if (event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
             //proxy like EGI

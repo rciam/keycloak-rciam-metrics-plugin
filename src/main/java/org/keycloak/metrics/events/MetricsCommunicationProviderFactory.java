@@ -10,6 +10,7 @@ import java.util.Set;
 import org.keycloak.Config;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.events.EventType;
+import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
@@ -21,7 +22,7 @@ public class MetricsCommunicationProviderFactory implements EventListenerProvide
 
     private static final Set<EventType> SUPPORTED_EVENTS = new HashSet<>();
     static {
-        Collections.addAll(SUPPORTED_EVENTS, EventType.LOGIN, EventType.LOGIN_ERROR, EventType.REGISTER);
+        Collections.addAll(SUPPORTED_EVENTS, EventType.LOGIN, EventType.LOGIN_ERROR, EventType.REGISTER, EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_CREATE), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_SUSPEND), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_DELETE));
     }
 
     private Set<EventType> includedEvents = new HashSet<>();

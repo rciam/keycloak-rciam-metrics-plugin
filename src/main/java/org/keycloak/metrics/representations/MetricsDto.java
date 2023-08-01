@@ -32,6 +32,8 @@ public class MetricsDto {
     private String eventIdentifier;
     private String type;
 
+    private String voName;
+
     private Boolean failedLogin;
 
     private String status;
@@ -45,20 +47,33 @@ public class MetricsDto {
         this.tenenvId = realm.getAttribute(MetricsUtils.TENENV_ID);
         this.source = realm.getAttribute(MetricsUtils.SOURCE);
         this.eventIdentifier = event.getId();
-        switch (event.getType()) {
-            case LOGIN:
+        switch (event.getType().toString()) {
+            case MetricsUtils.LOGIN:
                 this.type = "login";
-                this.failedLogin = false;
+                this.failedLogin = Boolean.FALSE;
                 setLogin(event, realm);
                 break;
-            case LOGIN_ERROR:
+            case MetricsUtils.LOGIN_ERROR:
                 this.type = "login";
-                this.failedLogin = true;
+                this.failedLogin = Boolean.TRUE;
                 setLogin(event, realm);
                 break;
-            case REGISTER:
+            case MetricsUtils.REGISTER:
                 this.type = "registration";
                 this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
+                break;
+            case MetricsUtils.GROUP_MEMBERSHIP_CREATE:
+                this.status = "A";
+                setGroupMembership(event);
+                break;
+            case MetricsUtils.GROUP_MEMBERSHIP_DELETE:
+                this.status = "XP";
+                //or 'D"???
+                setGroupMembership(event);
+                break;
+            case MetricsUtils.GROUP_MEMBERSHIP_SUSPEND:
+                this.status = "S";
+                setGroupMembership(event);
                 break;
         }
     }
@@ -90,6 +105,13 @@ public class MetricsDto {
             this.spName = client.getName();
         }
 
+    }
+
+
+    private void setGroupMembership(Event event) {
+        this.type = "membership";
+        this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
+        this.voName = event.getDetails().get(MetricsUtils.EVENT_GROUP).split("/")[1];
     }
 
     public LocalDateTime getDate() {
@@ -156,11 +178,11 @@ public class MetricsDto {
         this.source = source;
     }
 
-    public boolean getFailedLogin() {
+    public Boolean getFailedLogin() {
         return failedLogin;
     }
 
-    public void setFailedLogin(boolean failedLogin) {
+    public void setFailedLogin(Boolean failedLogin) {
         this.failedLogin = failedLogin;
     }
 
@@ -194,5 +216,13 @@ public class MetricsDto {
 
     public void setIdpName(String idpName) {
         this.idpName = idpName;
+    }
+
+    public String getVoName() {
+        return voName;
+    }
+
+    public void setVoName(String voName) {
+        this.voName = voName;
     }
 }

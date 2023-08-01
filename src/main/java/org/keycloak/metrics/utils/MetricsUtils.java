@@ -15,4 +15,12 @@ public class MetricsUtils {
     public static final String SOURCE = "source";
     public static final String TENENV_ID = "tenenvId";
     public static final String KEYCLOAK_URL = "keycloakUrl";
+
+    public static final String EVENT_GROUP = "group";
+    public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBERSHIP_CREATE";
+    public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";
+    public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
+    public static final String LOGIN = "LOGIN";
+    public static final String LOGIN_ERROR = "LOGIN_ERROR";
+    public static final String REGISTER = "REGISTER";
 }

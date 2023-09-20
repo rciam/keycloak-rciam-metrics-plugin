@@ -24,7 +24,7 @@ public class MetricsEvent {
         instance.init();
         KeycloakSession session = instance.create();
         MetricsTimerProvider timer = (MetricsTimerProvider) session.getProvider(TimerProvider.class, "metrics");
-        //schedule task every 4 hours
+        //schedule task every 4 hours - test
         //long interval = 4 * 3600 * 1000;
         long interval = 3 * 60 * 1000;
         timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");

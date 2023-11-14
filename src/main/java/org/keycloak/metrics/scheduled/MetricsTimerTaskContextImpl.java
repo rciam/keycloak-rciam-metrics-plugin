@@ -4,7 +4,7 @@ import java.util.TimerTask;
 
 import org.keycloak.timer.TimerProvider;
 
-public class MetricsTimerTaskContextImpl implements TimerProvider.TimerTaskContext {
+public class MetricsTimerTaskContextImpl implements MetricsTimerProvider.MetricsTimerTaskContext {
 
     private final Runnable runnable;
     final TimerTask timerTask;

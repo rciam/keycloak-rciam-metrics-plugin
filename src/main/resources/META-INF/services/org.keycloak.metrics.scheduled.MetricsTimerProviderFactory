@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-org.keycloak.metrics.scheduled.MetricsTimerProviderFactory
+org.keycloak.metrics.scheduled.BasicMetricsTimerProviderFactory

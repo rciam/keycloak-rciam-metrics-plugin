@@ -6,6 +6,7 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.metrics.scheduled.MetricsTimerProvider;
 import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.metrics.scheduled.BasicMetricsTimerProvider;
 import org.keycloak.metrics.scheduled.MetricsCommunicationTask;
@@ -35,7 +36,7 @@ public class MetricsCommunicationProvider implements EventListenerProvider {
 
     private void metricsCommunication(Event event) {
         RealmModel realm = session.realms().getRealm(event.getRealmId());
-        BasicMetricsTimerProvider timer = (BasicMetricsTimerProvider) session.getProvider(TimerProvider.class, "metrics");
+        MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
         timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(event, realm.getId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + event.getId());
 
     }

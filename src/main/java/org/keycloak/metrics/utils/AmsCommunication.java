@@ -8,12 +8,12 @@ import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
@@ -25,9 +25,7 @@ import org.keycloak.models.RealmModel;
 public class AmsCommunication {
 
     private static final Logger logger = Logger.getLogger(AmsCommunication.class);
-    private static final OkHttpClient client = new OkHttpClient.Builder().build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private static final List<EventType> groupEvents = Stream.of(EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_CREATE), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_SUSPEND), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_DELETE)).collect(Collectors.toList());
 
@@ -40,23 +38,21 @@ public class AmsCommunication {
             String amsJson = objectMapper.writeValueAsString(amsDto);
             logger.info("try to write message with body : " + amsJson);
 
-            Request request = new Request.Builder()
-                    .url(realm.getAttribute(MetricsUtils.AMS_URL) + MetricsUtils.PUBLISH)
-                    .addHeader("Accept", "application/json")
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader(MetricsUtils.API_KEY, realm.getAttribute(MetricsUtils.API_KEY))
-                    .post(RequestBody.create(amsJson, JSON))
-                    .build();
+            try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+                HttpPost request = new HttpPost(realm.getAttribute(MetricsUtils.AMS_URL) + MetricsUtils.PUBLISH);
+                request.addHeader("Accept", "application/json");
+                request.addHeader("Content-Type", "application/json");
+                request.addHeader(MetricsUtils.API_KEY, realm.getAttribute(MetricsUtils.API_KEY));
+                StringEntity se = new StringEntity(amsJson);
+                request.setEntity(se);
 
-            Response response = client.newCall(request).execute();
-            if (!response.isSuccessful()) {
-                int statusCode = response.code();
-                logger.error("ams response error with status: " + statusCode);
-                logger.error("message : " + response.message());
-                response.close();
-                throw new BadRequestException("ams response error with status: " + statusCode);
-            } else {
-                response.close();
+                CloseableHttpResponse response = client.execute(request);
+                if (response.getStatusLine().getStatusCode() >= 400) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    logger.error("ams response error with status: " + statusCode);
+                    response.close();
+                    throw new BadRequestException("ams response error with status: " + statusCode);
+                }
             }
         }
 

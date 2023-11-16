@@ -67,7 +67,7 @@ public class MetricsCommunicationProviderFactory implements EventListenerProvide
         if(executeStartupTasks) {
             logger.info("Keycloak metrics plugin event listener is starting...");
             try (KeycloakSession session = factory.create()) {
-                MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class, "basic");
+                MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
                 //schedule task every 4 hours
                 long interval = 4 * 3600 * 1000;
                 timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");

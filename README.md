@@ -19,3 +19,10 @@ You need to define the following realm attributes in order Keycloak metric plugi
 - keycloakUrl : Keycloak main url
 
 Moreover, you need to add in Events Config -> Event Listeners the "metrics-communication".
+
+## Keycloak compatibility matrix
+| Group management version | Keycloak version         |
+|--------------------------|--------------------------|
+| 1.2.0                    | 18.0.1-2.17              |
+| 2.0.0                    | 22.0.5-1.1 - 22.0.10-1.5 |
+| 2.1.0                    | 222.0.10-1.7 +           |

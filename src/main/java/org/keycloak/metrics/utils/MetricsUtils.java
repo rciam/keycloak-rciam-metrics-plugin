@@ -3,6 +3,7 @@ package org.keycloak.metrics.utils;
 public class MetricsUtils {
 
     public static final String AUTHN_AUTHORITY = "authnAuthority";
+    public static final String IDP_NAME = "idpName";
     public static final String VO_PERSON_ID = "voPersonID";
     public static final String IDP_ALIAS = "identity_provider";
     public static final String ENTITY_ID = "entityId";

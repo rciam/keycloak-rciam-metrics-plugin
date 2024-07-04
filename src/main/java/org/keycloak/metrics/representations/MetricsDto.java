@@ -84,8 +84,9 @@ public class MetricsDto {
             event.setDetails(new HashMap<>());
         this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
         if (event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
-            //proxy like EGI
+            //authnAuthority of IdP in user session note (name = identity_provider_id)
             this.entityId = event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY);
+            this.idpName  = event.getDetails().get(MetricsUtils.IDP_NAME);
         } else if (event.getDetails().get(MetricsUtils.IDP_ALIAS) != null) {
             //idp
             String idpAlias = event.getDetails().get(MetricsUtils.IDP_ALIAS);
@@ -97,7 +98,7 @@ public class MetricsDto {
         } else {
             //Keycloak user
             this.entityId = realm.getAttribute(MetricsUtils.KEYCLOAK_URL) + "/realms/" + realm.getName();
-            this.idpName = "Keycloak";
+            this.idpName = realm.getDisplayName() != null ? realm.getDisplayName() : realm.getName();
         }
         this.identifier = event.getClientId();
         ClientModel client = realm.getClientByClientId(event.getClientId());

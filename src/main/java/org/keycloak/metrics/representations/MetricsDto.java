@@ -1,12 +1,15 @@
 package org.keycloak.metrics.representations;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.keycloak.events.Event;
@@ -14,6 +17,7 @@ import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
+import org.keycloak.util.JsonSerialization;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MetricsDto {
@@ -42,7 +46,7 @@ public class MetricsDto {
 
     }
 
-    public MetricsDto(Event event, RealmModel realm) {
+    public MetricsDto(Event event, RealmModel realm) throws IOException {
         this.date = LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault());
         this.tenenvId = realm.getAttribute(MetricsUtils.TENENV_ID);
         this.source = realm.getAttribute(MetricsUtils.SOURCE);
@@ -78,12 +82,16 @@ public class MetricsDto {
         }
     }
 
-    private void setLogin(Event event, RealmModel realm) {
+    private void setLogin(Event event, RealmModel realm) throws IOException {
         this.ipAddress = event.getIpAddress();
         if (event.getDetails() == null)
             event.setDetails(new HashMap<>());
         this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
-        if (event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
+        if (event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES) != null) {
+            AuthnAuthorityRepresentation lastAuthnAuthority = JsonSerialization.readValue(event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES),new TypeReference<LinkedList<AuthnAuthorityRepresentation>>(){}).getLast();
+            this.entityId = lastAuthnAuthority.getId();
+            this.idpName  = lastAuthnAuthority.getName();
+        } else if (event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
             //authnAuthority of IdP in user session note (name = identity_provider_id)
             this.entityId = event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY);
             this.idpName  = event.getDetails().get(MetricsUtils.IDP_NAME);

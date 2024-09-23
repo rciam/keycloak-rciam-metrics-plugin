@@ -17,6 +17,7 @@ You need to define the following realm attributes in order Keycloak metric plugi
 - tenenvId : environment parameter
 - source : Keycloak
 - keycloakUrl : Keycloak main url
+- metricsUserIdAttribute : key of event details that value will be set to voPersonId, default to username
 
 Moreover, you need to add in Events Config -> Event Listeners the "metrics-communication".
 

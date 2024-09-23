@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import org.keycloak.events.Details;
 import org.keycloak.events.Event;
 import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.models.ClientModel;
@@ -46,7 +47,7 @@ public class MetricsDto {
 
     }
 
-    public MetricsDto(Event event, RealmModel realm) throws IOException {
+    public MetricsDto(Event event, RealmModel realm) throws Exception {
         this.date = LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault());
         this.tenenvId = realm.getAttribute(MetricsUtils.TENENV_ID);
         this.source = realm.getAttribute(MetricsUtils.SOURCE);
@@ -82,11 +83,14 @@ public class MetricsDto {
         }
     }
 
-    private void setLogin(Event event, RealmModel realm) throws IOException {
+    private void setLogin(Event event, RealmModel realm) throws Exception {
         this.ipAddress = event.getIpAddress();
         if (event.getDetails() == null)
             event.setDetails(new HashMap<>());
-        this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
+        String userIdentifier = realm.getAttribute(MetricsUtils.METRICS_USER_ID_ATTRIBUTE);
+        this.voPersonId = event.getDetails().get(userIdentifier != null ? userIdentifier : Details.USERNAME);
+        if ( this.voPersonId == null)
+            throw new Exception(userIdentifier + " as userIdentifier does not exist in");
         if (event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES) != null) {
             AuthnAuthorityRepresentation lastAuthnAuthority = JsonSerialization.readValue(event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES),new TypeReference<LinkedList<AuthnAuthorityRepresentation>>(){}).getLast();
             this.entityId = lastAuthnAuthority.getId();

@@ -29,7 +29,7 @@ public class AmsCommunication {
 
     private static final List<EventType> groupEvents = Stream.of(EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_CREATE), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_SUSPEND), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_DELETE)).collect(Collectors.toList());
 
-    public static void communicate(RealmModel realm, Event event) throws BadRequestException, IOException {
+    public static void communicate(RealmModel realm, Event event) throws Exception {
         //groupEvents are only allowed for top level groups
         if ((!groupEvents.contains(event.getType())) || StringUtils.countMatches(event.getDetails().get(MetricsUtils.EVENT_GROUP), "/") == 1) {
             MetricsDto metricsDto = new MetricsDto(event, realm);

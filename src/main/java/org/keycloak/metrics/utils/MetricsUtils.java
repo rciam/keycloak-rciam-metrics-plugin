@@ -19,7 +19,8 @@ public class MetricsUtils {
     public static final String KEYCLOAK_URL = "keycloakUrl";
 
     public static final String EVENT_GROUP = "group";
-    public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBERSHIP_CREATE";
+    public static final String METRICS_USER_ID_ATTRIBUTE = "metricsUserIdAttribute";
+    public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBEmetricsUserIdAttributeRSHIP_CREATE";
     public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";
     public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
     public static final String LOGIN = "LOGIN";

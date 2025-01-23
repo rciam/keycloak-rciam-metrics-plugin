@@ -92,9 +92,9 @@ public class MetricsDto {
         if ( this.voPersonId == null)
             throw new Exception(userIdentifier + " as userIdentifier does not exist in");
         if (event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES) != null) {
-            AuthnAuthorityRepresentation lastAuthnAuthority = JsonSerialization.readValue(event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES),new TypeReference<LinkedList<AuthnAuthorityRepresentation>>(){}).getLast();
-            this.entityId = lastAuthnAuthority.getId();
-            this.idpName  = lastAuthnAuthority.getName();
+            AuthnAuthorityRepresentation firstAuthnAuthority = JsonSerialization.readValue(event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES),new TypeReference<LinkedList<AuthnAuthorityRepresentation>>(){}).getFirst();
+            this.entityId = firstAuthnAuthority.getId();
+            this.idpName  = firstAuthnAuthority.getName();
         } else if (event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY) != null) {
             //authnAuthority of IdP in user session note (name = identity_provider_id)
             this.entityId = event.getDetails().get(MetricsUtils.AUTHN_AUTHORITY);

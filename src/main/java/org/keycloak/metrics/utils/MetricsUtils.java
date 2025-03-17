@@ -26,4 +26,6 @@ public class MetricsUtils {
     public static final String LOGIN = "LOGIN";
     public static final String LOGIN_ERROR = "LOGIN_ERROR";
     public static final String REGISTER = "REGISTER";
+    public static final String EXCLUDED_CLIENTS_CONFIGURATION = "excluded.clients";
+    public static final String COMMA = ",";
 }

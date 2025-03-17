@@ -35,7 +35,8 @@ public class PushEventsTask implements ScheduledTask {
                 Stream<Tuple> events = repository.eventsNotSendByRealm(realm.getId());
                 events.forEach(eventNotSend -> {
                     try {
-                        AmsCommunication.communicate(realm, convertEventEntity(eventNotSend));
+                        AmsCommunication ams = new AmsCommunication();
+                        ams.communicate(realm, convertEventEntity(eventNotSend));
                         repository.deleteEntity((String) eventNotSend.get("id"));
                     } catch (Exception e) {
                         e.printStackTrace();

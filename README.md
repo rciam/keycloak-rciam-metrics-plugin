@@ -18,6 +18,7 @@ You need to define the following realm attributes in order Keycloak metric plugi
 - source : Keycloak
 - keycloakUrl : Keycloak main url
 - metricsUserIdAttribute : key of event details that value will be set to voPersonId, default to username
+- excluded.clients : comma separated list of excluded clients from log in and register events
 
 Moreover, you need to add in Events Config -> Event Listeners the "metrics-communication".
 

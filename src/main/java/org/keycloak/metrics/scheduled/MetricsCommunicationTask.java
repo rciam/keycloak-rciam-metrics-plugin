@@ -22,7 +22,8 @@ public class MetricsCommunicationTask implements ScheduledTask {
         RealmModel realm = session.realms().getRealm(realmId);
 
         try {
-            AmsCommunication.communicate(realm, event);
+            AmsCommunication ams = new AmsCommunication();
+            ams.communicate(realm, event);
         } catch (Exception e) {
             e.printStackTrace();
             EventNotSendRepository eventNotSendRepository = new EventNotSendRepository(session);

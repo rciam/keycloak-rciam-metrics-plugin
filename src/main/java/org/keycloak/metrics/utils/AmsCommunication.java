@@ -1,6 +1,7 @@
 package org.keycloak.metrics.utils;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,10 +29,11 @@ public class AmsCommunication {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final List<EventType> groupEvents = Stream.of(EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_CREATE), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_SUSPEND), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_DELETE)).collect(Collectors.toList());
+    private static final List<EventType> loginEvents = Stream.of(EventType.valueOf(MetricsUtils.LOGIN), EventType.valueOf(MetricsUtils.LOGIN_ERROR), EventType.valueOf(MetricsUtils.REGISTER)).collect(Collectors.toList());
 
-    public static void communicate(RealmModel realm, Event event) throws Exception {
+    public void communicate(RealmModel realm, Event event) throws Exception {
         //groupEvents are only allowed for top level groups
-        if ((!groupEvents.contains(event.getType())) || StringUtils.countMatches(event.getDetails().get(MetricsUtils.EVENT_GROUP), "/") == 1) {
+        if (isAllowedEvent(realm, event)) {
             MetricsDto metricsDto = new MetricsDto(event, realm);
             String encodedData = Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(metricsDto));
             AmsDto amsDto = new AmsDto(new MessagesDto(encodedData));
@@ -56,5 +58,11 @@ public class AmsCommunication {
             }
         }
 
+    }
+
+    private boolean isAllowedEvent(RealmModel realm, Event event) {
+        String excludedClientsConfigurationValue = realm.getAttribute(MetricsUtils.EXCLUDED_CLIENTS_CONFIGURATION);
+        List<String> excludedClients = excludedClientsConfigurationValue == null ? new ArrayList<>() : Arrays.asList(excludedClientsConfigurationValue.split(MetricsUtils.COMMA));
+        return (loginEvents.contains(event.getType()) && !excludedClients.contains(event.getClientId())) || (groupEvents.contains(event.getType()) && StringUtils.countMatches(event.getDetails().get(MetricsUtils.EVENT_GROUP), "/") == 1);
     }
 }

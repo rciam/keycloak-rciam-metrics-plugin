@@ -25,6 +25,18 @@ public class EventNotSendRepository {
     }
 
     public Stream<Tuple> eventsNotSendByRealm(String realmId) {
-        return em.createNativeQuery("select f.*  from event_entity f join event_not_send e on f.id = e.event_id where e.realm_id= :realmId", Tuple.class).setParameter("realmId", realmId).getResultStream();
+        return em.createNativeQuery("select f.*  from EVENT_ENTITY f join EVENT_NOT_SEND e on f.id = e.event_id where f.realm_id= :realmId", Tuple.class).setParameter("realmId", realmId).getResultStream();
+    }
+
+    public void createAdmin(String eventId, String realmId) {
+        em.createNativeQuery("INSERT INTO admin_event_not_send (realm_id,event_id) VALUES (:realmId, :eventId)").setParameter("eventId", eventId).setParameter("realmId", realmId).executeUpdate();
+    }
+
+    public void deleteAdminEntity(String eventId) {
+        em.createNativeQuery("delete from admin_event_not_send where event_id = :eventId").setParameter("eventId", eventId).executeUpdate();
+    }
+
+    public Stream<Tuple> adminEventsNotSendByRealm(String realmId) {
+        return em.createNativeQuery("select f.*  from ADMIN_EVENT_ENTITY f join ADMIN_EVENT_NOT_SEND e on f.id = e.event_id where f.realm_id= :realmId", Tuple.class).setParameter("realmId", realmId).getResultStream();
     }
 }

@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
+import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.metrics.utils.AmsCommunication;
 import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.metrics.jpa.EventNotSendRepository;
@@ -36,8 +38,18 @@ public class PushEventsTask implements ScheduledTask {
                 events.forEach(eventNotSend -> {
                     try {
                         AmsCommunication ams = new AmsCommunication();
-                        ams.communicate(realm, convertEventEntity(eventNotSend));
+                        ams.communicate(realm, convertEventEntity(eventNotSend), null);
                         repository.deleteEntity((String) eventNotSend.get("id"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+                Stream<Tuple> adminEvents = repository.adminEventsNotSendByRealm(realm.getId());
+                adminEvents.forEach(eventNotSend -> {
+                    try {
+                        AmsCommunication ams = new AmsCommunication();
+                        ams.communicate(realm, null, convertAdminEventEntity(eventNotSend));
+                        repository.deleteAdminEntity((String) eventNotSend.get("id"));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -50,7 +62,7 @@ public class PushEventsTask implements ScheduledTask {
     private Event convertEventEntity(Tuple tuple) {
         Event event = new Event();
         event.setId((String) tuple.get("id"));
-        event.setTime(((BigInteger) tuple.get("event_time")).longValue());
+        event.setTime(((Long) tuple.get("event_time")).longValue());
         event.setType(EventType.valueOf((String) tuple.get("type")));
         event.setClientId((String) tuple.get("client_id"));
         event.setUserId((String) tuple.get("user_id"));
@@ -63,6 +75,16 @@ public class PushEventsTask implements ScheduledTask {
         } catch (IOException ex) {
             logger.error("Failed to read log details", ex);
         }
+        return event;
+    }
+
+    private AdminEvent convertAdminEventEntity(Tuple tuple) {
+        AdminEvent event = new AdminEvent();
+        event.setId((String) tuple.get("id"));
+        event.setTime(((Long) tuple.get("event_time")));
+        event.setOperationType(OperationType.valueOf((String) tuple.get("operation_type")));
+        event.setResourcePath((String) tuple.get("resource_type"));
+        event.setError((String) tuple.get("error"));
         return event;
     }
 }

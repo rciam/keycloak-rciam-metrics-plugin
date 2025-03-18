@@ -29,4 +29,32 @@
         />
 
     </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="metrics-plugin-admin">
+        <createTable tableName="ADMIN_EVENT_NOT_SEND">
+            <column name="REALM_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EVENT_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="REALM_ID, EVENT_ID" constraintName="ADMIN_EVENT_NOT_SEND_PK" tableName="ADMIN_EVENT_NOT_SEND"/>
+        <addForeignKeyConstraint
+                constraintName="ADMIN_EVENT_NOT_SEND_FK1"
+                baseTableName="ADMIN_EVENT_NOT_SEND"
+                baseColumnNames="REALM_ID"
+                referencedTableName="REALM"
+                referencedColumnNames="id"
+        />
+
+        <addForeignKeyConstraint
+                constraintName="ADMIN_EVENT_NOT_SEND_FK2"
+                baseTableName="ADMIN_EVENT_NOT_SEND"
+                baseColumnNames="EVENT_ID"
+                referencedTableName="ADMIN_EVENT_ENTITY"
+                referencedColumnNames="id"
+        />
+
+    </changeSet>
 </databaseChangeLog>

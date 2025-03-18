@@ -14,8 +14,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.keycloak.events.Details;
 import org.keycloak.events.Event;
+import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.util.JsonSerialization;
@@ -38,6 +40,7 @@ public class MetricsDto {
     private String type;
 
     private String voName;
+    private String voDescription;
 
     private Boolean failedLogin;
 
@@ -81,6 +84,17 @@ public class MetricsDto {
                 setGroupMembership(event);
                 break;
         }
+    }
+
+    public MetricsDto(AdminEvent event, GroupModel group, RealmModel realm) {
+        this.date = LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault());
+        this.tenenvId = realm.getAttribute(MetricsUtils.TENENV_ID);
+        this.source = realm.getAttribute(MetricsUtils.SOURCE);
+        this.eventIdentifier = event.getId();
+        this.status = "A";
+        this.type = "vo";
+        this.voName = group.getName();
+        this.voDescription = group.getFirstAttribute(MetricsUtils.DESCRIPTION);
     }
 
     private void setLogin(Event event, RealmModel realm) throws Exception {
@@ -237,5 +251,13 @@ public class MetricsDto {
 
     public void setVoName(String voName) {
         this.voName = voName;
+    }
+
+    public String getVoDescription() {
+        return voDescription;
+    }
+
+    public void setVoDescription(String voDescription) {
+        this.voDescription = voDescription;
     }
 }

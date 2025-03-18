@@ -9,11 +9,14 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.events.EventType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.metrics.scheduled.MetricsTimerProvider;
 import org.keycloak.metrics.scheduled.PushEventsTask;
 import org.keycloak.metrics.utils.MetricsUtils;
@@ -39,7 +42,7 @@ public class MetricsCommunicationProviderFactory implements EventListenerProvide
 
     @Override
     public MetricsCommunicationProvider create(KeycloakSession session) {
-        return new MetricsCommunicationProvider(session, includedEvents);
+        return new MetricsCommunicationProvider(session, includedEvents, Stream.of(ResourceType.GROUP).collect(Collectors.toSet()));
     }
 
     @Override

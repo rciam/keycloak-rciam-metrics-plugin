@@ -17,7 +17,7 @@
         <okhttp.version>4.12.0</okhttp.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <metrics-version>2.5.0</metrics-version>
+        <metrics-version>2.5.1</metrics-version>
     </properties>
 
     <dependencies>

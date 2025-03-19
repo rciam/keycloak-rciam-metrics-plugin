@@ -55,6 +55,10 @@ public class MetricsDto {
         this.tenenvId = realm.getAttribute(MetricsUtils.TENENV_ID);
         this.source = realm.getAttribute(MetricsUtils.SOURCE);
         this.eventIdentifier = event.getId();
+        String userIdentifier = realm.getAttribute(MetricsUtils.METRICS_USER_ID_ATTRIBUTE);
+        if ( this.voPersonId == null)
+            throw new Exception(userIdentifier + " as userIdentifier does not exist in");
+        this.voPersonId = event.getDetails().get(userIdentifier != null ? userIdentifier : Details.USERNAME);
         switch (event.getType().toString()) {
             case MetricsUtils.LOGIN:
                 this.type = "login";
@@ -68,7 +72,6 @@ public class MetricsDto {
                 break;
             case MetricsUtils.REGISTER:
                 this.type = "registration";
-                this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
                 break;
             case MetricsUtils.GROUP_MEMBERSHIP_CREATE:
                 this.status = "A";
@@ -101,10 +104,6 @@ public class MetricsDto {
         this.ipAddress = event.getIpAddress();
         if (event.getDetails() == null)
             event.setDetails(new HashMap<>());
-        String userIdentifier = realm.getAttribute(MetricsUtils.METRICS_USER_ID_ATTRIBUTE);
-        this.voPersonId = event.getDetails().get(userIdentifier != null ? userIdentifier : Details.USERNAME);
-        if ( this.voPersonId == null)
-            throw new Exception(userIdentifier + " as userIdentifier does not exist in");
         if (event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES) != null) {
             AuthnAuthorityRepresentation firstAuthnAuthority = JsonSerialization.readValue(event.getDetails().get(MetricsUtils.IDENTITY_PROVIDER_AUTHN_AUTHORITIES),new TypeReference<LinkedList<AuthnAuthorityRepresentation>>(){}).getFirst();
             this.entityId = firstAuthnAuthority.getId();
@@ -137,7 +136,6 @@ public class MetricsDto {
 
     private void setGroupMembership(Event event) {
         this.type = "membership";
-        this.voPersonId = event.getDetails().get(MetricsUtils.VO_PERSON_ID);
         this.voName = event.getDetails().get(MetricsUtils.EVENT_GROUP).split("/")[1];
     }
 

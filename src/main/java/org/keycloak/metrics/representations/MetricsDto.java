@@ -56,9 +56,9 @@ public class MetricsDto {
         this.source = realm.getAttribute(MetricsUtils.SOURCE);
         this.eventIdentifier = event.getId();
         String userIdentifier = realm.getAttribute(MetricsUtils.METRICS_USER_ID_ATTRIBUTE);
-        if ( this.voPersonId == null)
-            throw new Exception(userIdentifier + " as userIdentifier does not exist in");
         this.voPersonId = event.getDetails().get(userIdentifier != null ? userIdentifier : Details.USERNAME);
+        if ( this.voPersonId == null)
+            throw new Exception(userIdentifier + " as userIdentifier does not exist in event");
         switch (event.getType().toString()) {
             case MetricsUtils.LOGIN:
                 this.type = "login";

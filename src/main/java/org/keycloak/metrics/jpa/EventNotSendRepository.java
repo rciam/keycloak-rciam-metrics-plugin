@@ -4,6 +4,7 @@ import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
+import jakarta.persistence.Query;
 
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
@@ -25,7 +26,11 @@ public class EventNotSendRepository {
     }
 
     public Stream<Tuple> eventsNotSendByRealm(String realmId) {
-        return em.createNativeQuery("select f.*  from EVENT_ENTITY f join EVENT_NOT_SEND e on f.id = e.event_id where f.realm_id= :realmId", Tuple.class).setParameter("realmId", realmId).getResultStream();
+        return em.createNativeQuery("select f.*  from EVENT_ENTITY f join EVENT_NOT_SEND e on f.id = e.event_id where f.realm_id= :realmId limit 200", Tuple.class).setParameter("realmId", realmId).getResultStream();
+    }
+
+    public long countEventsNotSendByRealm(String realmId) {
+        return ((Number) em.createNativeQuery("select count(*) FROM EVENT_NOT_SEND where realm_id= :realmId").setParameter("realmId", realmId).getSingleResult()).longValue();
     }
 
     public void createAdmin(String eventId, String realmId) {
@@ -37,6 +42,12 @@ public class EventNotSendRepository {
     }
 
     public Stream<Tuple> adminEventsNotSendByRealm(String realmId) {
-        return em.createNativeQuery("select f.*  from ADMIN_EVENT_ENTITY f join ADMIN_EVENT_NOT_SEND e on f.id = e.event_id where f.realm_id= :realmId", Tuple.class).setParameter("realmId", realmId).getResultStream();
+        return em.createNativeQuery("select f.*  from ADMIN_EVENT_ENTITY f join ADMIN_EVENT_NOT_SEND e on f.id = e.event_id where f.realm_id= :realmId limit 200", Tuple.class).setParameter("realmId", realmId).getResultStream();
     }
+
+    public long countAdminEventsNotSendByRealm(String realmId) {
+        return ((Number) em.createNativeQuery("select count(*) FROM ADMIN_EVENT_NOT_SEND where realm_id= :realmId").setParameter("realmId", realmId).getSingleResult()).longValue();
+    }
+
+
 }

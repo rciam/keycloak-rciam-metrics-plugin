@@ -2,8 +2,8 @@ package org.keycloak.metrics.scheduled;
 
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.persistence.Tuple;
@@ -13,12 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
-import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.events.admin.OperationType;
 import org.keycloak.metrics.utils.AmsCommunication;
 import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.metrics.jpa.EventNotSendRepository;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.timer.ScheduledTask;
 
 public class PushEventsTask implements ScheduledTask {
@@ -31,9 +31,12 @@ public class PushEventsTask implements ScheduledTask {
     @Override
     public void run(KeycloakSession session) {
         EventNotSendRepository repository = new EventNotSendRepository(session);
-        session.realms().getRealmsStream().forEach(realm -> {
+        boolean reExecute = false;
+        for (RealmModel realm : session.realms().getRealmsStream().collect(Collectors.toList()))
+        {
             String metricsUrl = realm.getAttribute(MetricsUtils.AMS_URL);
             if (metricsUrl != null) {
+                logger.infof("PushEventsTask is running for realm %s", realm.getName());
                 Stream<Tuple> events = repository.eventsNotSendByRealm(realm.getId());
                 events.forEach(eventNotSend -> {
                     try {
@@ -44,19 +47,17 @@ public class PushEventsTask implements ScheduledTask {
                         e.printStackTrace();
                     }
                 });
-                Stream<Tuple> adminEvents = repository.adminEventsNotSendByRealm(realm.getId());
-                adminEvents.forEach(eventNotSend -> {
-                    try {
-                        AmsCommunication ams = new AmsCommunication();
-                        ams.communicate(realm, null, convertAdminEventEntity(eventNotSend));
-                        repository.deleteAdminEntity((String) eventNotSend.get("id"));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+                if (repository.countEventsNotSendByRealm(realm.getId()) > 0)
+                    reExecute = true;
             }
 
-        });
+        }
+        if (reExecute) {
+            logger.infof("Reexecute PushEventsTask");
+            MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
+            long interval = 300 * 1000;
+            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");
+        }
     }
 
     private Event convertEventEntity(Tuple tuple) {
@@ -78,13 +79,4 @@ public class PushEventsTask implements ScheduledTask {
         return event;
     }
 
-    private AdminEvent convertAdminEventEntity(Tuple tuple) {
-        AdminEvent event = new AdminEvent();
-        event.setId((String) tuple.get("id"));
-        event.setTime(((Long) tuple.get("event_time")));
-        event.setOperationType(OperationType.valueOf((String) tuple.get("operation_type")));
-        event.setResourcePath((String) tuple.get("resource_type"));
-        event.setError((String) tuple.get("error"));
-        return event;
-    }
 }

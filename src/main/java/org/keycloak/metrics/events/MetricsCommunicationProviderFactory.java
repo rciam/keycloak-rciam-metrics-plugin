@@ -18,6 +18,7 @@ import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.metrics.scheduled.MetricsTimerProvider;
+import org.keycloak.metrics.scheduled.PushAdminEventsTask;
 import org.keycloak.metrics.scheduled.PushEventsTask;
 import org.keycloak.metrics.utils.MetricsUtils;
 import org.keycloak.models.KeycloakSession;
@@ -73,8 +74,10 @@ public class MetricsCommunicationProviderFactory implements EventListenerProvide
                 MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
                 //schedule task every 4 hours
                 long interval = 4 * 3600 * 1000;
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");
-                timer.schedule(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, interval, "PushEventsTaskDaily");
+                //long delay = 2 * 3600 * 1000;
+                long delay = 300 * 1000;
+                timer.schedule(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), delay, interval, "PushEventsTaskDaily");
+                timer.schedule(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushAdminEventsTask(), interval), delay, interval, "PushAdminEventsTaskDaily");
             }
             executeStartupTasks = false;
         }

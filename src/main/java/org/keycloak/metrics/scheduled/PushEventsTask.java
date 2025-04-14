@@ -55,7 +55,7 @@ public class PushEventsTask implements ScheduledTask {
         if (reExecute) {
             logger.infof("Reexecute PushEventsTask");
             MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
-            long interval = 300 * 1000;
+            long interval = 900 * 1000;
             timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");
         }
     }

@@ -40,12 +40,11 @@ public class AmsCommunication {
    public void communicate(RealmModel realm, Event event, AdminEvent adminEvent) throws Exception {
         if (event != null && isAllowedEvent(realm, event)) {
             communicateWithAms(new MetricsDto(event, realm), realm);
-        } else if (adminEvent != null && ALLOWED_OPERATION_TYPES.contains(adminEvent.getOperationType()) && !StringUtils.endsWith(adminEvent.getResourcePath(), CHILDREN)) {
-            String groupId = adminEvent.getResourcePath().substring(adminEvent.getResourcePath().lastIndexOf('/') + 1);
-            GroupModel group = realm.getGroupById(groupId);
+        } else if (adminEvent != null && ALLOWED_OPERATION_TYPES.contains(adminEvent.getOperationType())) {
+            GroupModel group = realm.getGroupById(adminEvent.getResourcePath());
             if (group == null) {
-                logger.errorf("Metrics plugin could not find group with %s id", groupId);
-            } else {
+                logger.errorf("Metrics plugin could not find group with %s id", adminEvent.getResourcePath());
+            } else if (group.getParent() == null) {
                 communicateWithAms(new MetricsDto(adminEvent, group, realm), realm);
             }
         }

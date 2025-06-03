@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -31,7 +32,6 @@ public class AmsCommunication {
     private static final Logger logger = Logger.getLogger(AmsCommunication.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String CHILDREN = "children";
     private static final List<OperationType> ALLOWED_OPERATION_TYPES = Stream.of(OperationType.CREATE, OperationType.UPDATE).collect(Collectors.toList());
 
     private static final List<EventType> groupEvents = Stream.of(EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_CREATE), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_SUSPEND), EventType.valueOf(MetricsUtils.GROUP_MEMBERSHIP_DELETE)).collect(Collectors.toList());
@@ -57,7 +57,13 @@ public class AmsCommunication {
         String amsJson = objectMapper.writeValueAsString(amsDto);
         logger.info("try to write message with body : " + amsJson);
 
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+        try (CloseableHttpClient client = HttpClientBuilder.create()
+                .setConnectionTimeToLive(60, java.util.concurrent.TimeUnit.SECONDS)
+                .setDefaultRequestConfig(org.apache.http.client.config.RequestConfig.custom()
+                        .setConnectTimeout(60000)
+                        .setSocketTimeout(60000)
+                        .build())
+                .build()) {
             HttpPost request = new HttpPost(realm.getAttribute(MetricsUtils.AMS_URL) + MetricsUtils.PUBLISH);
             request.addHeader("Accept", "application/json");
             request.addHeader("Content-Type", "application/json");
@@ -65,12 +71,20 @@ public class AmsCommunication {
             StringEntity se = new StringEntity(amsJson);
             request.setEntity(se);
 
-            CloseableHttpResponse response = client.execute(request);
-            if (response.getStatusLine().getStatusCode() >= 400) {
-                int statusCode = response.getStatusLine().getStatusCode();
-                logger.error("ams response error with status: " + statusCode);
-                response.close();
-                throw new BadRequestException("ams response error with status: " + statusCode);
+            try {
+                CloseableHttpResponse response = client.execute(request);
+                if (response.getStatusLine().getStatusCode() >= 400) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    logger.error("ams response error with status: " + statusCode);
+                    response.close();
+                    throw new BadRequestException("ams response error with status: " + statusCode);
+                }
+            } catch (ConnectTimeoutException e) {
+                logger.error("No response from ams after a minute", e);
+                throw new BadRequestException("No response from ams after a minute");
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new BadRequestException("General problem during communication with ams"+ e.getMessage());
             }
         }
     }

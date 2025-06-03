@@ -32,31 +32,35 @@ public class PushEventsTask implements ScheduledTask {
     public void run(KeycloakSession session) {
         EventNotSendRepository repository = new EventNotSendRepository(session);
         boolean reExecute = false;
-        for (RealmModel realm : session.realms().getRealmsStream().collect(Collectors.toList()))
-        {
-            String metricsUrl = realm.getAttribute(MetricsUtils.AMS_URL);
-            if (metricsUrl != null) {
-                logger.infof("PushEventsTask is running for realm %s", realm.getName());
-                Stream<Tuple> events = repository.eventsNotSendByRealm(realm.getId());
-                events.forEach(eventNotSend -> {
-                    try {
-                        AmsCommunication ams = new AmsCommunication();
-                        ams.communicate(realm, convertEventEntity(eventNotSend), null);
-                        repository.deleteEntity((String) eventNotSend.get("id"));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-                if (repository.countEventsNotSendByRealm(realm.getId()) > 0)
-                    reExecute = true;
-            }
 
-        }
-        if (reExecute) {
-            logger.infof("Reexecute PushEventsTask");
-            MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
-            long interval = 900 * 1000;
-            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");
+        try {
+            for (RealmModel realm : session.realms().getRealmsStream().collect(Collectors.toList())) {
+                String metricsUrl = realm.getAttribute(MetricsUtils.AMS_URL);
+                if (metricsUrl != null) {
+                    logger.infof("PushEventsTask is running for realm %s", realm.getName());
+                    Stream<Tuple> events = repository.eventsNotSendByRealm(realm.getId());
+                    events.forEach(eventNotSend -> {
+                        try {
+                            AmsCommunication ams = new AmsCommunication();
+                            ams.communicate(realm, convertEventEntity(eventNotSend), null);
+                            repository.deleteEntity((String) eventNotSend.get("id"));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    if (repository.countEventsNotSendByRealm(realm.getId()) > 0)
+                        reExecute = true;
+                }
+
+            }
+            if (reExecute) {
+                logger.infof("Reexecute PushEventsTask");
+                MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
+                long interval = 900 * 1000;
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new PushEventsTask(), interval), interval, "PushEventsTaskOnce");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 

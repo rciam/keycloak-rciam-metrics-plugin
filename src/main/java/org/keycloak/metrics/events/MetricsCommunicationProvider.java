@@ -36,16 +36,14 @@ public class MetricsCommunicationProvider implements EventListenerProvider {
     }
 
     private void metricsCommunication(Event event) {
-        RealmModel realm = session.realms().getRealm(event.getRealmId());
         MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
-        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(event, null, realm.getId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + event.getId());
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(event, null, event.getRealmId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + event.getId());
 
     }
 
     private void metricsCommunication(AdminEvent adminEvent, boolean includeRepresentation) {
-        RealmModel realm = session.realms().getRealm(adminEvent.getRealmId());
         MetricsTimerProvider timer = session.getProvider(MetricsTimerProvider.class);
-        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(null, adminEvent, realm.getId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + adminEvent.getId());
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MetricsCommunicationTask(null, adminEvent, adminEvent.getRealmId()), 60 * 1000), 30 * 1000, "MetricsCommunicationTask" + adminEvent.getId());
 
     }
 

@@ -42,21 +42,11 @@ public class BasicMetricsTimerProvider implements MetricsTimerProvider {
     public void scheduleOnce(final Runnable runnable, final long delay, String taskName) {
 
         logger.debugf("Task '%s' will be executed with delay '%d'", taskName, delay);
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runnable.run();
-            }
-        }, delay);
+        timer.schedule(new BasicTimerTask(runnable), delay);
     }
 
     private TimerTask createTimerTask (final Runnable runnable, final long intervalMillis, String taskName) {
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                runnable.run();
-            }
-        };
+        TimerTask task = new BasicTimerTask(runnable);
 
         MetricsTimerTaskContextImpl taskContext = new MetricsTimerTaskContextImpl(runnable, task, intervalMillis);
         MetricsTimerTaskContextImpl existingTask = factory.putTask(taskName, taskContext);
@@ -87,6 +77,19 @@ public class BasicMetricsTimerProvider implements MetricsTimerProvider {
     @Override
     public void close() {
         // do nothing
+    }
+
+    private static class BasicTimerTask extends TimerTask {
+        private final Runnable runnable;
+
+        public BasicTimerTask(Runnable runnable) {
+            this.runnable = runnable;
+        }
+
+        @Override
+        public void run() {
+            runnable.run();
+        }
     }
 
 }

@@ -6,17 +6,17 @@
     <parent>
         <artifactId>keycloak-parent</artifactId>
         <groupId>org.keycloak</groupId>
-        <version>22.0.5</version>
+        <version>26.5.0</version>
     </parent>
 
     <groupId>org.keycloak</groupId>
     <artifactId>keycloak-rciam-metrics-plugin</artifactId>
 
     <properties>
-        <quarkus.version>3.2.7.Final</quarkus.version>
+        <quarkus.version>3.27.0</quarkus.version>
         <okhttp.version>4.12.0</okhttp.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <metrics-version>2.6.3</metrics-version>
     </properties>
 
